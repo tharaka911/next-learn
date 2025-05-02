@@ -28,3 +28,26 @@ jobs:
 
       - name: Deploy Project Artifacts to Vercel
         run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN_DEV }}
+
+      # Dummy step to manually break pipeline based on GitHub environment variable
+      - name: Fail Pipeline if BREAK_PIPELINE is true
+        if: env.BREAK_PIPELINE == 'true'
+        run: |
+          echo "Manually breaking the pipeline as BREAK_PIPELINE is set to true."
+          exit 1
+        env:
+          BREAK_PIPELINE: ${{ vars.BREAK_PIPELINE }}
+
+  notify-failure:
+    runs-on: ubuntu-latest
+    needs: [Deploy-to-Dev]
+    if: failure()
+    steps:
+      - name: Send Discord Notification
+        run: |
+          curl -X POST -H "Content-Type: application/json" \
+          -d '{
+              "username": "GitHub Actions Alert",
+              "content": "🚨 The pipeline failed during the **${{ github.workflow }}** workflow on branch **${{ github.ref_name }}**. Check the logs here: ${{ github.run_url }}"
+          }' \
+          ${{ secrets.DISCORD_WEBHOOK }}
