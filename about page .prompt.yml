@@ -1,0 +1,11 @@
+messages:
+  - role: system
+    content: ''
+  - role: user
+    content: >
+      I want to create a static page called about in this sample NextJS
+      application 
+
+
+      be creative add dummy data
+model: openai/gpt-4.1
